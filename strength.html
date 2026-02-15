@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Password Strength Checker - PasswordFort | 密码强度检测</title>
+<meta name="description" content="Check your password strength with real-time scoring, crack time estimation and common password detection. 检测密码强度，实时评分。">
+<meta name="keywords" content="password strength checker, password strength test, how strong is my password, 密码强度检测, 密码安全检测">
+<link rel="canonical" href="https://rorojiao.github.io/passwordfort/strength.html">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-brand">🔐 <span data-i18n="brand">PasswordFort</span></a>
+  <div class="nav-links">
+    <a href="index.html" data-i18n="nav_home">Home</a>
+    <a href="generator.html" data-i18n="nav_generator">Generator</a>
+    <a href="strength.html" class="active" data-i18n="nav_strength">Strength Check</a>
+    <button id="langToggle" onclick="toggleLang()">中文</button>
+  </div>
+</nav>
+
+<div class="container">
+  <h1 data-i18n="str_title">Password Strength Checker</h1>
+  <p class="subtitle" data-i18n="str_sub">Enter a password to analyze its security</p>
+
+  <div class="card">
+    <input type="text" id="pwInput" data-i18n="str_placeholder" placeholder="Type or paste a password..." autocomplete="off" spellcheck="false">
+    
+    <div class="strength-bar-container">
+      <div class="strength-bar" id="strBar"></div>
+    </div>
+    <div class="strength-label" id="strLabel">—</div>
+
+    <div class="strength-details">
+      <div class="detail-item">
+        <div class="label" data-i18n="str_score">Score</div>
+        <div class="value" id="dScore">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="label" data-i18n="str_length">Length</div>
+        <div class="value" id="dLen">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="label" data-i18n="str_diversity">Diversity</div>
+        <div class="value" id="dDiv">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="label" data-i18n="str_crack_time">Crack Time</div>
+        <div class="value" id="dCrack">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="label" data-i18n="str_common">Common Password</div>
+        <div class="value" id="dCommon">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p data-i18n="footer_text">PasswordFort — Free, open-source, client-side password tools.</p>
+  <div class="donate"><span data-i18n="donate_label">Support us (ETH/EVM):</span> <code>0xEeD903787Cb86bcCc17777E5C7d10A4c2De43823</code></div>
+</footer>
+
+<script src="i18n.js"></script>
+<script>
+const COMMON = new Set(["password","123456","12345678","qwerty","abc123","monkey","1234567","letmein","trustno1","dragon","baseball","iloveyou","master","sunshine","ashley","michael","shadow","123123","654321","superman","qazwsx","football","password1","password123","welcome","hello123","charlie","donald","admin","login","princess","starwars","solo","passw0rd","welcome1","121212","flower","hottie","loveme","zaq1zaq1","666666","888888","000000","111111","1qaz2wsx","qwerty123","password1234","iloveyou1","nothing","changeme"]);
+
+const $ = id => document.getElementById(id);
+
+function analyze(pw) {
+  if (!pw) return reset();
+  const len = pw.length;
+  const hasLower = /[a-z]/.test(pw);
+  const hasUpper = /[A-Z]/.test(pw);
+  const hasDigit = /[0-9]/.test(pw);
+  const hasSymbol = /[^a-zA-Z0-9]/.test(pw);
+  const types = [hasLower, hasUpper, hasDigit, hasSymbol].filter(Boolean).length;
+  const isCommon = COMMON.has(pw.toLowerCase());
+
+  // Pool size for entropy
+  let pool = 0;
+  if (hasLower) pool += 26;
+  if (hasUpper) pool += 26;
+  if (hasDigit) pool += 10;
+  if (hasSymbol) pool += 32;
+  if (pool === 0) pool = 26;
+
+  const entropy = len * Math.log2(pool);
+
+  // Score 0-100
+  let score = Math.min(100, Math.round(entropy * 1.5));
+  if (isCommon) score = Math.min(score, 10);
+  if (len < 8) score = Math.min(score, 20);
+
+  // Verdict
+  let verdict, color;
+  if (score <= 20) { verdict = 0; color = '#ff5252'; }
+  else if (score <= 40) { verdict = 1; color = '#ff7043'; }
+  else if (score <= 60) { verdict = 2; color = '#ffd740'; }
+  else if (score <= 80) { verdict = 3; color = '#69f0ae'; }
+  else { verdict = 4; color = '#00e676'; }
+
+  const L = LANG[currentLang];
+
+  // Crack time
+  const guessesPerSec = 1e10; // 10B/sec
+  const totalGuesses = Math.pow(pool, len);
+  const seconds = totalGuesses / guessesPerSec / 2;
+  const crackTime = formatTime(seconds, currentLang);
+
+  const divLabels = { en: [`${types}/4 types`, '1/4 types', '2/4 types', '3/4 types', '4/4 types'], zh: [`${types}/4 类`, '1/4 类', '2/4 类', '3/4 类', '4/4 类'] };
+
+  $('strBar').style.width = score + '%';
+  $('strBar').style.background = color;
+  $('strLabel').textContent = L['str_verdict_' + verdict];
+  $('strLabel').style.color = color;
+  $('dScore').textContent = score + '/100';
+  $('dLen').textContent = len;
+  $('dDiv').textContent = `${types}/4`;
+  $('dCrack').textContent = crackTime;
+  $('dCommon').innerHTML = isCommon ? L.str_yes : L.str_no;
+}
+
+function formatTime(sec) {
+  if (!isFinite(sec) || sec > 3.15e15) return currentLang === 'zh' ? '数十亿年+' : 'Billions of years+';
+  if (sec < 0.001) return currentLang === 'zh' ? '瞬间' : 'Instantly';
+  if (sec < 60) return currentLang === 'zh' ? `${Math.round(sec)} 秒` : `${Math.round(sec)} seconds`;
+  if (sec < 3600) return currentLang === 'zh' ? `${Math.round(sec/60)} 分钟` : `${Math.round(sec/60)} minutes`;
+  if (sec < 86400) return currentLang === 'zh' ? `${Math.round(sec/3600)} 小时` : `${Math.round(sec/3600)} hours`;
+  if (sec < 31536000) return currentLang === 'zh' ? `${Math.round(sec/86400)} 天` : `${Math.round(sec/86400)} days`;
+  const y = sec / 31536000;
+  if (y < 1e6) return currentLang === 'zh' ? `${Math.round(y)} 年` : `${Math.round(y)} years`;
+  if (y < 1e9) return currentLang === 'zh' ? `${(y/1e6).toFixed(1)} 百万年` : `${(y/1e6).toFixed(1)}M years`;
+  return currentLang === 'zh' ? '数十亿年+' : 'Billions of years+';
+}
+
+function reset() {
+  $('strBar').style.width = '0';
+  $('strLabel').textContent = '—';
+  $('strLabel').style.color = '';
+  ['dScore','dLen','dDiv','dCrack','dCommon'].forEach(id => $(id).textContent = '—');
+}
+
+$('pwInput').addEventListener('input', e => analyze(e.target.value));
+</script>
+</body>
+</html>

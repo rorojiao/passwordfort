@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PasswordFort - Secure Password Generator & Strength Checker | 密码生成器</title>
+<meta name="description" content="Free online password generator and password strength checker. Generate strong passwords and test password security. 免费在线密码生成器和密码强度检测工具。">
+<meta name="keywords" content="password generator, password strength checker, secure password, random password, 密码生成器, 密码强度检测, 随机密码, 安全密码">
+<meta property="og:title" content="PasswordFort - Secure Password Generator & Strength Checker">
+<meta property="og:description" content="Generate strong passwords and check their strength — 100% client-side.">
+<meta property="og:url" content="https://rorojiao.github.io/passwordfort/">
+<link rel="canonical" href="https://rorojiao.github.io/passwordfort/">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-brand">🔐 <span data-i18n="brand">PasswordFort</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="active" data-i18n="nav_home">Home</a>
+    <a href="generator.html" data-i18n="nav_generator">Generator</a>
+    <a href="strength.html" data-i18n="nav_strength">Strength Check</a>
+    <button id="langToggle" onclick="toggleLang()">中文</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1 data-i18n="hero_title">Password<span>Fort</span> 🔐</h1>
+  <p data-i18n="hero_sub">Generate strong passwords and check their strength — all in your browser, nothing leaves your device.</p>
+  <div class="hero-buttons">
+    <a href="generator.html" class="btn btn-primary" data-i18n="btn_generate">🎲 Generate Password</a>
+    <a href="strength.html" class="btn btn-outline" data-i18n="btn_check">🛡️ Check Strength</a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon">🔒</div>
+    <h3 data-i18n="feat1_title">Secure Generation</h3>
+    <p data-i18n="feat1_desc">Cryptographically random passwords with customizable length and character sets.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📊</div>
+    <h3 data-i18n="feat2_title">Strength Analysis</h3>
+    <p data-i18n="feat2_desc">Real-time scoring with crack time estimation and common password detection.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🖥️</div>
+    <h3 data-i18n="feat3_title">100% Client-Side</h3>
+    <p data-i18n="feat3_desc">Everything runs in your browser. No data is ever sent to any server.</p>
+  </div>
+</section>
+
+<footer>
+  <p data-i18n="footer_text">PasswordFort — Free, open-source, client-side password tools.</p>
+  <div class="donate"><span data-i18n="donate_label">Support us (ETH/EVM):</span> <code>0xEeD903787Cb86bcCc17777E5C7d10A4c2De43823</code></div>
+</footer>
+
+<script src="i18n.js"></script>
+</body>
+</html>

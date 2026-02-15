@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Password Generator - PasswordFort | 密码生成器</title>
+<meta name="description" content="Generate strong, random passwords with custom length and character sets. Free online password generator. 在线生成强随机密码。">
+<meta name="keywords" content="password generator, random password generator, strong password, 密码生成器, 随机密码生成">
+<link rel="canonical" href="https://rorojiao.github.io/passwordfort/generator.html">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-brand">🔐 <span data-i18n="brand">PasswordFort</span></a>
+  <div class="nav-links">
+    <a href="index.html" data-i18n="nav_home">Home</a>
+    <a href="generator.html" class="active" data-i18n="nav_generator">Generator</a>
+    <a href="strength.html" data-i18n="nav_strength">Strength Check</a>
+    <button id="langToggle" onclick="toggleLang()">中文</button>
+  </div>
+</nav>
+
+<div class="container">
+  <h1 data-i18n="gen_title">Password Generator</h1>
+  <p class="subtitle" data-i18n="gen_sub">Create strong, unique passwords instantly</p>
+
+  <div class="card">
+    <h2><span data-i18n="length">Length</span>: <span id="lenVal">16</span></h2>
+    <input type="range" id="lenSlider" min="8" max="64" value="16">
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="chkUpper" checked> <span data-i18n="uppercase">Uppercase (A-Z)</span></label>
+      <label><input type="checkbox" id="chkLower" checked> <span data-i18n="lowercase">Lowercase (a-z)</span></label>
+      <label><input type="checkbox" id="chkDigit" checked> <span data-i18n="digits">Digits (0-9)</span></label>
+      <label><input type="checkbox" id="chkSymbol" checked> <span data-i18n="symbols">Symbols (!@#$...)</span></label>
+    </div>
+    <button class="btn btn-primary" onclick="generateOne()" data-i18n="generate">🎲 Generate</button>
+    <div class="password-display">
+      <span class="pw-text" id="pwOut">—</span>
+      <button class="copy-btn" onclick="copyPw()" title="Copy">📋</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="batch">Batch Generate</h2>
+    <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;">
+      <label style="margin:0" data-i18n="batch_count">Count</label>
+      <input type="number" id="batchCount" min="1" max="10" value="5" style="width:80px">
+      <button class="btn btn-outline" onclick="generateBatch()" data-i18n="generate">🎲 Generate</button>
+    </div>
+    <div class="batch-list" id="batchList"></div>
+  </div>
+</div>
+
+<footer>
+  <p data-i18n="footer_text">PasswordFort — Free, open-source, client-side password tools.</p>
+  <div class="donate"><span data-i18n="donate_label">Support us (ETH/EVM):</span> <code>0xEeD903787Cb86bcCc17777E5C7d10A4c2De43823</code></div>
+</footer>
+
+<script src="i18n.js"></script>
+<script>
+const slider = document.getElementById('lenSlider');
+const lenVal = document.getElementById('lenVal');
+slider.addEventListener('input', () => lenVal.textContent = slider.value);
+
+function getCharset() {
+  let c = '';
+  if (document.getElementById('chkUpper').checked) c += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if (document.getElementById('chkLower').checked) c += 'abcdefghijklmnopqrstuvwxyz';
+  if (document.getElementById('chkDigit').checked) c += '0123456789';
+  if (document.getElementById('chkSymbol').checked) c += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  return c || 'abcdefghijklmnopqrstuvwxyz';
+}
+
+function generate(len) {
+  const cs = getCharset();
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, v => cs[v % cs.length]).join('');
+}
+
+function generateOne() {
+  document.getElementById('pwOut').textContent = generate(+slider.value);
+}
+
+function generateBatch() {
+  const n = Math.min(10, Math.max(1, +document.getElementById('batchCount').value));
+  const list = document.getElementById('batchList');
+  list.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const pw = generate(+slider.value);
+    const div = document.createElement('div');
+    div.className = 'batch-item';
+    div.innerHTML = `<span>${pw}</span><button class="copy-btn" onclick="copyText(this,'${pw}')" title="Copy">📋</button>`;
+    list.appendChild(div);
+  }
+}
+
+function copyPw() {
+  const t = document.getElementById('pwOut').textContent;
+  if (t && t !== '—') navigator.clipboard.writeText(t).then(() => showCopied());
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => { btn.textContent = '✅'; setTimeout(() => btn.textContent = '📋', 1200); });
+}
+
+function showCopied() {
+  const b = document.querySelector('.password-display .copy-btn');
+  b.textContent = '✅'; setTimeout(() => b.textContent = '📋', 1200);
+}
+
+generateOne();
+</script>
+</body>
+</html>
